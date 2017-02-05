@@ -16,17 +16,19 @@ public class Term {
 	}
 	
 	//break down the term into coefficient and variable
-	//String splitTermRegex = "(?=(^[0-9](.[0-9]*)?))";
-	String splitTermRegex = "(?=[a-zA-Z])";
+	//could probably move this to Canonicalize class instead
+	String splitTermRegex = "(?<=\\d)(?=[a-zA-Z])";
 	void splitToCOandVA(String term){
 		String[] terms = term.split(splitTermRegex);
 		if(terms.length == 1){
-			System.out.println("term2: " + terms[0]);
+			//System.out.println("term2: " + terms[0]);
 			coefficient = 1.0;
+			variable = terms[0];
 			
 		}else{
-			System.out.println("term1: " + terms[0] + " terms2: " + terms[1]);
+			//System.out.println("term1: " + terms[0] + " terms2: " + terms[1]);
 			coefficient = Double.valueOf(terms[0]);
+			variable = terms[1];
 		}
 		
 		
@@ -39,7 +41,7 @@ public class Term {
 		}else if(signOperator.equals("-")){
 			operator = -1;
 		}else{
-			System.out.println("ERROR: bad signOperator");
+			System.out.println("ERROR: malformed expression");
 		}
 	}
 
@@ -48,8 +50,10 @@ public class Term {
 		coefficient = coefficient*operator;
 		if(operator == -1){
 			operator = 1;
+		}else if(operator == 1){
+			
 		}else{
-			System.out.println("ERROR: combineOPandCO");
+			System.out.println("ERROR: combineOPandCO. operator: " + operator + " coefficient: " + coefficient);
 		}
 	}
 	
