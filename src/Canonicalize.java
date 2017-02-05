@@ -10,7 +10,7 @@ public class Canonicalize {
 //		
 //		System.out.println("Read Input From Console? (Y/N)? ");
 		
-		String input = "3x^2 + 3.5xy - 3.3y = y^2 - xy + y + x^2";
+		String input = "3x^2 + 3.5xy - 3.3y = y^2 - 555xy + y + x^2";
 		
 		String[] splitEquation = input.split("=");
 		
@@ -25,7 +25,6 @@ public class Canonicalize {
 		//TODO: /,*?
 		//TODO: consider brackets ()
 		//uses ?<= look ahead, and ?= look behind
-		//TODO: need to handle - -number
 		//TODO: need to handle variables in any order
 		String termSplitRegex = "(?<=[+-])|(?=[+-])" ;
 		
@@ -39,29 +38,79 @@ public class Canonicalize {
 		createTerms(rightTerms, rightExpression);
 		
 		//Test Code
-//		for(Term t: leftTerms){
-//			System.out.print("coef: " + t.getCoefficient() + " varaiabe: " + t.getVariable() + ". \n");
-//		}
-//		for(Term t: rightTerms){
-//			System.out.print("coef: " + t.getCoefficient() + " varaiabe: " + t.getVariable() + ". \n");
-//		}
+		for(Term t: leftTerms){
+			System.out.print("coef: " + t.getCoefficient() + " variable: " + t.getVariable() + ". \n");
+		}
+		System.out.println("");
+		for(Term t: rightTerms){
+			System.out.print("coef: " + t.getCoefficient() + " variable: " + t.getVariable() + ". \n");
+		}
+		System.out.println("");
 		
 		//combine left and right
-		ArrayList<Term> combinedTerms = new ArrayList<Term>();
-//		Term[] leftTermsArray = (Term[])leftTerms.toArray();
-//		Term[] rightTermsArray = (Term[])rightTerms.toArray();
+		ArrayList<Term> ct = combineTerms(leftTerms, rightTerms);
+		printOutput(ct);
 		
-//		if(leftTermsArray.length > rightTermsArray.length){
-//			
-//		}
 		
-		//TODO: assume that coefficients only appear once in equation, error if not
-		for(int i=0; i<leftTerms.size(); i++){
-			for(int j=0; j<rightTerms.size(); j++){
-				if(leftTerms.get(i).getVariable().equals(rightTerms.get(j).getVariable())){
+	}
+	
+	//format double to show cleanly
+	private static String cleanDoubleFormat(Double d)
+	{
+	    if(d == d.intValue())
+	        return String.format("%d",d.intValue());
+	    else
+	        return String.format("%s",d);
+	}
+	
+	private static void printOutput(ArrayList<Term> ct){
+		//print out final result in clean format
+		for(int i=0; i<ct.size(); i++){
+			//System.out.println("coeff: " + t.getCoefficient() + " var: " + t.getVariable());
+			
+			Term t = ct.get(i);
+			String coef = "";
+			//format
+			if(t.getCoefficient() == 1.0 || t.getCoefficient() == -1.0){
+				coef = "";
+			}else if(t.getCoefficient() < 0){
+				coef = cleanDoubleFormat(t.getCoefficient()*-1);
+			}else{
+				coef = cleanDoubleFormat(t.getCoefficient());
+			}
+			if(i==0){
+				System.out.print(coef + t.getVariable() + " ");
+				continue;
+			}
+			
+			//print
+			if(t.getCoefficient() < 0){
+				System.out.print("- " + coef + t.getVariable() + " ");
+			}else{
+				System.out.print("+ " + coef + t.getVariable() + " ");
+			}
+
+		}
+		System.out.print("= 0");
+	}
+	
+	//TODO: assume that coefficients only appear once per side, error if not
+	//search for matching variables in left and right equation sides
+	private static ArrayList<Term> combineTerms(ArrayList<Term> lt, ArrayList<Term> rt){
+		ArrayList<Term> ct = new ArrayList<Term>();
+		
+		for(int i=0; i<lt.size(); i++){
+			System.out.println("lv: " + lt.get(i).getVariable() + "\n");
+			for(int j=0; j<rt.size(); j++){
+				if(lt.get(i).getVariable().equals(rt.get(j).getVariable())){
 					//same variable, add coefficients
-					Double combinedCoef = leftTerms.get(i).getCoefficient() - rightTerms.get(j).getCoefficient();
-					String combinedVariable = leftTerms.get(i).getVariable();
+					
+					Double combinedCoef = lt.get(i).getCoefficient() - rt.get(j).getCoefficient();
+//					System.out.println("lf: " + lt.get(i).getCoefficient()
+//							+ " rf: " + rt.get(j).getCoefficient()
+//							+ " res: " + combinedCoef
+//							+ " var: " + lt.get(i).getVariable());
+					
 					String operator = "";
 					if(combinedCoef < 0){
 						operator = "-";
@@ -69,59 +118,41 @@ public class Canonicalize {
 					}else{
 						operator = "+";
 					}
+					
+					String combinedVariable = lt.get(i).getVariable();
+					
 					Term combinedTerm = new Term(operator, combinedCoef + combinedVariable);
-					combinedTerms.add(combinedTerm);
+					ct.add(combinedTerm);
 					
 					//remove from leftTerm and rightTerm
-					leftTerms.remove(i);
-					rightTerms.remove(j);
+					lt.remove(i);
+					i--;
+					rt.remove(j);
+					continue;
+				}else{
+//					System.out.print("lv: " + lt.get(i).getVariable() + " rv: " + rt.get(j).getVariable() + "\n");
 				}
+				
 			}
 		}
 		
 		//add the leftovers
-		if(!leftTerms.isEmpty()){
-			combinedTerms.addAll(leftTerms);
+		if(!lt.isEmpty()){
+			ct.addAll(lt);
 		}
-		if(!rightTerms.isEmpty()){
-			for(Term t: rightTerms){
+		if(!rt.isEmpty()){
+			for(Term t: rt){
 				if(t.getCoefficient() > 0){
 					Term leftOverRightTerm = new Term("-", t.getCoefficient() + t.getVariable());
-					combinedTerms.add(leftOverRightTerm);
+					ct.add(leftOverRightTerm);
 				}
 			}
 		}
 		
-		for(Term t: combinedTerms){
-			System.out.println("coeff: " + t.getCoefficient() + " var: " + t.getVariable());
-		}
-		
-		
-//		String exponent = "+";
-//		
-//		for(int i=0; i<leftExpression.length; i++){
-//			leftExpression[i] = leftExpression[i].trim();
-//	
-//			//odd or even determines exponent or term
-//			if(i%2 != 0){ //even
-//				exponent = leftExpression[i];
-//			}else{ //odd
-//				System.out.println("exponent: " + exponent);
-//				Term t = new Term(exponent, leftExpression[i]);
-//				leftTerms.add(t);
-//			}
-//
-//		}
-//		System.out.println("\n");
-//		for(String x: splitInput_RightItems){
-//			System.out.println(x.trim());
-//		}
-		//get the integer value
-		
+		return ct;
 	}
 	
-	
-	static void createTerms(List<Term> termsList, String[] expressions){
+	private static void createTerms(List<Term> termsList, String[] expressions){
 		String exponent = "+";
 	
 		for(int i=0; i<expressions.length; i++){
@@ -138,22 +169,4 @@ public class Canonicalize {
 		}
 	}
 	
-//	String[] mergeOperator(String[] equation){
-//		String[] mergedEquation;
-//		for(String x: equation){
-//			if(x.equals("+"))
-//		}
-//	}
-//	
-//	private class equationsParts{
-//		
-//		public Integer coefficient;
-//		public String variable;
-//		public Integer operator;
-//		
-//		//constants?
-//		
-//	}
-	
-
 }
