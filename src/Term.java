@@ -1,5 +1,5 @@
 
-public class Term {
+public class Term{
 
 	private Integer operator;
 	private Double coefficient;
@@ -8,28 +8,32 @@ public class Term {
 	
 	//constructor, user will give coefficient and term
 	//constructor will break down into components
-	public Term(String signOperator, String term){
+	public Term(String signOperator, String term) throws MalformedInputException{
 		//initial values
 		operator = 0;
 		coefficient = 0.0;
 		variable = "";
+		try{
+			convertSignOperator(signOperator);
+			splitCoefficientAndVariable(term);
+			combineOperatorAndCoefficient();
+		}catch(MalformedInputException e){
+				throw e;
+		}
 		
-		convertSignOperator(signOperator);
-		splitCoefficientAndVariable(term);
-		combineOperatorAndCoefficient();
 		
 	}
 	
 	//first thing to do
 	//takes + or -, convert to 1 or -1
 	//takes +/- sets operator to 1/-1
-	void convertSignOperator(String signOperator){
+	void convertSignOperator(String signOperator) throws MalformedInputException{
 		if(signOperator.equals("+")){
 			operator = 1;
 		}else if(signOperator.equals("-")){
 			operator = -1;
 		}else{
-			System.out.println("ERROR: malformed expression");
+			throw new MalformedInputException();
 		}
 	}
 	
