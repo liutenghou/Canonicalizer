@@ -1,6 +1,8 @@
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,22 +36,30 @@ public class Canonicalize {
 				}
 
 				if (modeSelected.matches("F")) { // open file
+					// for each line of input in file, parse, then output to .out file
+					
+					//input
 					System.out.print("Enter Filename>");
 					String fileName = scan.next();
-					fileName = "inputfiles/".concat(fileName);
 					FileReader fileReader = new FileReader(fileName);
 					BufferedReader bufferedReader = new BufferedReader(fileReader);
+
+					//output
+					String outputFileName = fileName.split("\\.[a-zA-Z]+$")[0] + ".out";
+		            FileWriter fileWriter = new FileWriter(outputFileName);
+		            BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
 
 					// read line by line
 					String line = null;
 					while ((line = bufferedReader.readLine()) != null) {
 						System.out.println(line);
-						System.out.println(createOutput(parseInput(line)));
+						String output = createOutput(parseInput(line));
+						System.out.println(output);
+						bufferedWriter.write(output);
 					}
 					
 					bufferedReader.close();
-					// for each line of input in file, parse, then output to
-					// .out file
+		            bufferedWriter.close();
 				} else if (modeSelected.matches("I")) { //interactive mode
 					System.out.print("Equation>");
 					String input = scan.nextLine();
@@ -64,14 +74,14 @@ public class Canonicalize {
 				System.out.println("File Error");
 			} catch(MalformedInputException e){
 				System.out.println("Malformed Input");
-			} catch (Exception e) {
-				System.out.println("Error");
+//			} catch (Exception e) {
+//				System.out.println("Error");
 			}
 
 		}
 	}
 
-	private static ArrayList<Term> parseInput(String input) throws MalformedInputException{
+	protected static ArrayList<Term> parseInput(String input) throws MalformedInputException{
 		
 		String[] splitEquation = input.split("=");
 
@@ -112,7 +122,7 @@ public class Canonicalize {
 	}
 
 	// returns output from arraylist of terms
-	private static String createOutput(ArrayList<Term> ct) {
+	protected static String createOutput(ArrayList<Term> ct) {
 		// print out final result in clean format
 		String output = "";
 		for (int i = 0; i < ct.size(); i++) {

@@ -1,4 +1,7 @@
-
+/*
+ * This class represents a term in an equation
+ * ie. ax^k
+ */
 public class Term{
 
 	private Integer operator;
@@ -43,10 +46,12 @@ public class Term{
 	String splitTermRegex = "(?<=\\d)(?=[a-zA-Z])";
 	void splitCoefficientAndVariable(String term){
 		String[] terms = term.split(splitTermRegex);
-		if(terms.length == 1){
+		if(terms.length == 1 && terms[0].matches("^[a-zA-Z].*")){ //just variable
 			//System.out.println("term2: " + terms[0]);
 			coefficient = 1.0;
 			variable = terms[0];
+		}else if(terms.length == 1 && terms[0].matches("^\\d.*")){ //just coeff
+			coefficient = Double.valueOf(terms[0]);
 		}else{
 			//System.out.println("term1: " + terms[0] + " terms2: " + terms[1]);
 			coefficient = Double.valueOf(terms[0]);
