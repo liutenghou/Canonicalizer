@@ -9,17 +9,19 @@ import java.util.Scanner;
 public class Canonicalize {
 
 	public static void main(String[] args) {
-
-		Scanner scan;
-
+		
 		while (true) { // run indefinitely, end with control-c
+			
 			try {
-				scan = new Scanner(System.in);
+				Scanner scan = new Scanner(System.in);;
 				String modeSelected = "";
+				
 				System.out.print("File(F) or Interactive(I) Mode>");
 				String modeChoice = scan.nextLine();
+				
 				String fileRegex = "[Ff](ile)?";
 				String interactiveRegex = "[Ii](nteractive)?";
+				
 				if (modeChoice.matches(fileRegex)) {
 					// System.out.println("File Mode");
 					modeSelected = "F";
@@ -34,8 +36,7 @@ public class Canonicalize {
 				if (modeSelected.matches("F")) { // open file
 					System.out.print("Enter Filename>");
 					String fileName = scan.next();
-					System.out.println();
-
+					fileName = "inputfiles/".concat(fileName);
 					FileReader fileReader = new FileReader(fileName);
 					BufferedReader bufferedReader = new BufferedReader(fileReader);
 
@@ -43,37 +44,34 @@ public class Canonicalize {
 					String line = null;
 					while ((line = bufferedReader.readLine()) != null) {
 						System.out.println(line);
+						System.out.println(createOutput(parseInput(line)));
 					}
-
+					
 					bufferedReader.close();
 					// for each line of input in file, parse, then output to
 					// .out file
-				} else if (modeSelected.matches("I")) {
+				} else if (modeSelected.matches("I")) { //interactive mode
 					System.out.print("Equation>");
 					String input = scan.nextLine();
-					// TODO: check input regex here
-					parseAndPrintInput(input);
-
+					System.out.println(createOutput(parseInput(input)));
 				} else {
 					System.out.println("ERROR: modeSelected");
 				}
-				scan.close();
+				
 			} catch (FileNotFoundException e) {
 				System.out.println("No File Found");
 			} catch (IOException e) {
 				System.out.println("File Error");
 			} catch(MalformedInputException e){
 				System.out.println("Malformed Input");
-//			} catch (Exception e) {
-//				System.out.println("Exception Main: " + e.getStackTrace().toString());
-//				System.out.println("Error");
+			} catch (Exception e) {
+				System.out.println("Error");
 			}
+
 		}
 	}
 
-	private static void parseAndPrintInput(String input) throws MalformedInputException{
-
-		// input = "3x^2 + 3.5xy - 3.3y = y^2 - 555xy + y + x^2";
+	private static ArrayList<Term> parseInput(String input) throws MalformedInputException{
 		
 		String[] splitEquation = input.split("=");
 
@@ -99,22 +97,10 @@ public class Canonicalize {
 		createTerms(leftTerms, leftExpression);
 		createTerms(rightTerms, rightExpression);
 
-		// Test Code
-		// for(Term t: leftTerms){
-		// System.out.print("coef: " + t.getCoefficient() + " variable: " +
-		// t.getVariable() + ". \n");
-		// }
-		// System.out.println("");
-		// for(Term t: rightTerms){
-		// System.out.print("coef: " + t.getCoefficient() + " variable: " +
-		// t.getVariable() + ". \n");
-		// }
-		// System.out.println("");
-
 		// combine left and right
 		ArrayList<Term> ct = combineTerms(leftTerms, rightTerms);
-		printOutput(ct);
-
+		//printOutput(ct);
+		return ct;
 	}
 
 	// format double to show cleanly
@@ -125,9 +111,10 @@ public class Canonicalize {
 			return String.format("%s", d);
 	}
 
-	// prints the final output
-	private static void printOutput(ArrayList<Term> ct) {
+	// returns output from arraylist of terms
+	private static String createOutput(ArrayList<Term> ct) {
 		// print out final result in clean format
+		String output = "";
 		for (int i = 0; i < ct.size(); i++) {
 			// System.out.println("coeff: " + t.getCoefficient() + " var: " +
 			// t.getVariable());
@@ -143,22 +130,23 @@ public class Canonicalize {
 				coef = cleanDoubleFormat(t.getCoefficient());
 			}
 			if (i == 0) {
-				System.out.print(coef + t.getVariable() + " ");
+				output = output + coef + t.getVariable() + " ";
 				continue;
 			}
 
 			// print
 			if (t.getCoefficient() < 0) {
-				System.out.print("- " + coef + t.getVariable() + " ");
+				output = output + "- " + coef + t.getVariable() + " ";
 			} else {
-				System.out.print("+ " + coef + t.getVariable() + " ");
+				output = output + "+ " + coef + t.getVariable() + " ";
 			}
 
 		}
-		System.out.print("= 0\n");
+		output = output + "= 0\n";
+		
+		return output;
 	}
 
-	// TODO: assume that coefficients only appear once per side, error if not
 	// search for matching variables in left and right equation sides
 	private static ArrayList<Term> combineTerms(ArrayList<Term> lt, ArrayList<Term> rt) throws MalformedInputException{
 		ArrayList<Term> ct = new ArrayList<Term>();
@@ -234,7 +222,7 @@ public class Canonicalize {
 			if (i % 2 != 0) { // even
 				exponent = expressions[i];
 			} else { // odd
-						// System.out.println("exponent: " + exponent);
+				// System.out.println("exponent: " + exponent);
 				Term t = new Term(exponent, expressions[i]);
 				termsList.add(t);
 			}

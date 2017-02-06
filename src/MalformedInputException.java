@@ -1,4 +1,6 @@
-
+/*
+ * This exception is thrown when an input is not in the form of an equation
+ */
 public class MalformedInputException extends Exception {
 
 	public MalformedInputException() {
