@@ -50,8 +50,6 @@ public class InputTest {
 		assertEquals("0 = 0", s.trim());
 	}
 	
-	
-	
 	@Test
 	public void brackets() throws Exception{
 		

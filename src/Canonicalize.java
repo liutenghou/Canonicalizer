@@ -8,6 +8,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
+/*
+ * Author: Leo Liu
+ * Canonicalize transforms and equation into its canonical form
+ */
 public class Canonicalize {
 
 	public static void main(String[] args) {
