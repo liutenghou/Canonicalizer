@@ -7,7 +7,7 @@ public class Term{
 	private Integer operator;
 	private Double coefficient;
 	private String variable;
-	//TODO: exponent
+	//TODO: exponent array
 	
 	//constructor, user will give coefficient and term
 	//constructor will break down into components
@@ -51,6 +51,7 @@ public class Term{
 			coefficient = 1.0;
 			variable = terms[0];
 		}else if(terms.length == 1 && terms[0].matches("^\\d.*")){ //just coeff
+			//System.out.println("term2: " + terms[0]);
 			coefficient = Double.valueOf(terms[0]);
 		}else{
 			//System.out.println("term1: " + terms[0] + " terms2: " + terms[1]);
@@ -62,11 +63,7 @@ public class Term{
 	//3rd thing done
 	//combine operator and coefficient
 	void combineOperatorAndCoefficient(){
-		if(operator != -1 || operator != 1){
-			coefficient = coefficient*operator;
-		}else{
-			System.out.println("ERROR: combineOPandCO. operator: " + operator + " coefficient: " + coefficient);
-		}
+		coefficient = coefficient*operator;
 	}
 	
 	//getters and setters
@@ -75,6 +72,9 @@ public class Term{
 	}
 	String getVariable(){
 		return variable;
+	}
+	Integer getOperator(){
+		return operator;
 	}
 	void setOperator(Integer op){
 		operator = op;

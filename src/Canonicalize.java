@@ -74,8 +74,10 @@ public class Canonicalize {
 				System.out.println("File Error");
 			} catch(MalformedInputException e){
 				System.out.println("Malformed Input");
-//			} catch (Exception e) {
-//				System.out.println("Error");
+			} catch(NumberFormatException e){
+				System.out.println("Malformed Input"); //maybe brackets
+			} catch (Exception e) {
+				System.out.println("Error");
 			}
 
 		}
@@ -212,8 +214,11 @@ public class Canonicalize {
 		}
 		if (!rt.isEmpty()) {
 			for (Term t : rt) {
-				if (t.getCoefficient() > 0) {
+				if (t.getCoefficient() > 0) { //positive on the right, minus on the left
 					Term leftOverRightTerm = new Term("-", t.getCoefficient() + t.getVariable());
+					ct.add(leftOverRightTerm);
+				}else{ //minus on the right, positive on left
+					Term leftOverRightTerm = new Term("+", t.getCoefficient()*-1 + t.getVariable());
 					ct.add(leftOverRightTerm);
 				}
 			}
