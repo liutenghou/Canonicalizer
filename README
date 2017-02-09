@@ -12,17 +12,26 @@ MalformedInputException.java
 InputTest.java //JUnit Tests
 input.txt //input equations for testing
 
+HOW TO RUN:
+either press f for file, or i for interactive at initial prompt
+if(f) type: input.txt (should be placed in the root directory)
+if(i) enter equation and press enter
+type control-c to exit
+
 Implemented:
-Two modes of operation: “file” and “interactive”. 
+Two modes of operation: file and interactive. 
 In interactive mode application prompts user to enter equation and displays result on enter.  
 This is repeated until user presses Ctrl+C. 
 In the file mode application processes a file specified as parameter 
-and writes the output into separate file with “.out” extension. 
+and writes the output into separate file with â€œ.outâ€� extension. 
 Input file contains lines with equations, each equation on separate line. 
 
 Not Implemented:
- - Bracket handling
- - Out of order variables. ie. xy = yx
+ - Out of order variables. ie. xy = yx, the justification for not implementing this
+ is the assumption that a variable may be multiple letters, for example "cat" and "bat" are different
+ whole variables which share some letters, and may not be the variables c,a,t and b,a,t.
+ If we assume that variables are single letter, then we could break down the variables
+ into x^k or x forms in an array in Term.java, and iterate through them when matching.
  - larger than Double value coefficients
  
 

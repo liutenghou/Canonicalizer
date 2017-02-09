@@ -7,7 +7,6 @@ public class Term{
 	private Integer operator;
 	private Double coefficient;
 	private String variable;
-	//TODO: exponent array
 	
 	//constructor, user will give coefficient and term
 	//constructor will break down into components
@@ -21,7 +20,7 @@ public class Term{
 			splitCoefficientAndVariable(term);
 			combineOperatorAndCoefficient();
 		}catch(MalformedInputException e){
-				throw e;
+			throw e;
 		}
 		
 		

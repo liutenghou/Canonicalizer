@@ -14,20 +14,20 @@ import java.util.Scanner;
  */
 public class Canonicalize {
 
-	public static void main(String[] args) {
-		
+	public static void main(String[] args){
+
 		while (true) { // run indefinitely, end with control-c
-			
 			try {
-				Scanner scan = new Scanner(System.in);;
+				Scanner scan = new Scanner(System.in);
+				;
 				String modeSelected = "";
-				
+
 				System.out.print("File(F) or Interactive(I) Mode>");
 				String modeChoice = scan.nextLine();
-				
+
 				String fileRegex = "[Ff](ile)?";
 				String interactiveRegex = "[Ii](nteractive)?";
-				
+
 				if (modeChoice.matches(fileRegex)) {
 					// System.out.println("File Mode");
 					modeSelected = "F";
@@ -40,46 +40,50 @@ public class Canonicalize {
 				}
 
 				if (modeSelected.matches("F")) { // open file
-					// for each line of input in file, parse, then output to .out file
-					
-					//input
+					// for each line of input in file, parse, then output to
+					// .out file
+
+					// input
 					System.out.print("Enter Filename>");
 					String fileName = scan.next();
 					FileReader fileReader = new FileReader(fileName);
 					BufferedReader bufferedReader = new BufferedReader(fileReader);
 
-					//output
+					// output
 					String outputFileName = fileName.split("\\.[a-zA-Z]+$")[0] + ".out";
-		            FileWriter fileWriter = new FileWriter(outputFileName);
-		            BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
+					FileWriter fileWriter = new FileWriter(outputFileName);
+					BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
 
 					// read line by line
 					String line = null;
 					while ((line = bufferedReader.readLine()) != null) {
+						if(!line.contains("=")){ //skips empty and maybe malformed lines
+							continue;
+						}
 						System.out.println(line);
 						String output = createOutput(parseInput(line));
 						System.out.println(output);
 						bufferedWriter.write(output);
 					}
-					
+
 					bufferedReader.close();
-		            bufferedWriter.close();
-				} else if (modeSelected.matches("I")) { //interactive mode
+					bufferedWriter.close();
+				} else if (modeSelected.matches("I")) { // interactive mode
 					System.out.print("Equation>");
 					String input = scan.nextLine();
 					System.out.println(createOutput(parseInput(input)));
 				} else {
 					System.out.println("ERROR: modeSelected");
 				}
-				
+
 			} catch (FileNotFoundException e) {
 				System.out.println("No File Found");
 			} catch (IOException e) {
 				System.out.println("File Error");
-			} catch(MalformedInputException e){
+			} catch (MalformedInputException e) {
 				System.out.println("Malformed Input");
-			} catch(NumberFormatException e){
-				System.out.println("Malformed Input"); //maybe brackets
+			} catch (NumberFormatException e) {
+				System.out.println("Malformed Input"); // maybe brackets
 			} catch (Exception e) {
 				System.out.println("Error");
 			}
@@ -87,16 +91,20 @@ public class Canonicalize {
 		}
 	}
 
-	protected static ArrayList<Term> parseInput(String input) throws MalformedInputException{
-		
+	protected static ArrayList<Term> parseInput(String input) throws MalformedInputException {
 		String[] splitEquation = input.split("=");
 
-		if(splitEquation.length < 2){
+		if (splitEquation.length < 2) {
+			for(int i=0; i<splitEquation.length; i++){
+				System.out.println("splitEquation: \n" + splitEquation[i]);
+			}
 			throw new MalformedInputException();
 		}
 		// check both sides of the split
 		String splitEquationLeft = splitEquation[0].trim();
 		String splitEquationRight = splitEquation[1].trim();
+		splitEquationLeft = eliminateBrackets(splitEquationLeft);
+		splitEquationRight = eliminateBrackets(splitEquationRight);
 
 		// split by +,-
 		// TODO: consider brackets ()
@@ -115,8 +123,55 @@ public class Canonicalize {
 
 		// combine left and right
 		ArrayList<Term> ct = combineTerms(leftTerms, rightTerms);
-		//printOutput(ct);
+		// printOutput(ct);
 		return ct;
+	}
+
+	//
+	private static String eliminateBrackets(String s) {
+		int bracketCount = 0;
+		String outerSign = "+";
+		char[] sarray = s.toCharArray();
+
+		while (String.valueOf(sarray).contains("(")) {
+			for (int i = 0; i < sarray.length; i++) {
+				// first match the closest sign to the bracket
+				if (bracketCount == 0) {
+					if (sarray[i] == '+') {
+						outerSign = "+";
+					} else if (sarray[i] == '-') {
+						outerSign = "-";
+					}
+				}
+				//convert if negative
+				if ( (bracketCount == 1) && (outerSign.equals("-")) ) {
+					
+					if (sarray[i] == '+') {
+						sarray[i] = '-';
+					} else if (sarray[i] == '-') {
+						sarray[i] = '+';
+					}
+				}
+
+				// break out if an opening bracket is found
+				// get the substring for this opening bracket
+				if (sarray[i] == '(') {
+					if (bracketCount == 0) {
+						// found the outer sign for the bracket
+						sarray[i] = ' ';
+					}
+					bracketCount++;
+				} else if (sarray[i] == ')') {
+					if (bracketCount == 1) {
+						sarray[i] = ' ';
+					}
+					bracketCount--;
+				}
+			}
+		}
+
+		return String.valueOf(sarray);
+
 	}
 
 	// format double to show cleanly
@@ -140,7 +195,7 @@ public class Canonicalize {
 			// format
 			if (t.getCoefficient() == 1.0 || t.getCoefficient() == -1.0) {
 				coef = "";
-			} else if (t.getCoefficient() < 0 && i != 0) {
+			} else if ((t.getCoefficient()) < 0 && (i != 0)) {
 				coef = cleanDoubleFormat(t.getCoefficient() * -1);
 			} else {
 				coef = cleanDoubleFormat(t.getCoefficient());
@@ -159,12 +214,12 @@ public class Canonicalize {
 
 		}
 		output = output + "= 0\n";
-		
+
 		return output;
 	}
 
 	// search for matching variables in left and right equation sides
-	private static ArrayList<Term> combineTerms(ArrayList<Term> lt, ArrayList<Term> rt) throws MalformedInputException{
+	private static ArrayList<Term> combineTerms(ArrayList<Term> lt, ArrayList<Term> rt) throws MalformedInputException {
 		ArrayList<Term> ct = new ArrayList<Term>();
 
 		for (int i = 0; i < lt.size(); i++) {
@@ -181,8 +236,14 @@ public class Canonicalize {
 
 					String operator = "";
 					if (combinedCoef < 0) {
-						operator = "-";
-						combinedCoef = combinedCoef * (-1);
+						
+						if(i != 0){
+							operator = "-";
+							combinedCoef = combinedCoef * (-1);
+						}else{
+							operator = "+";
+						}
+						
 					} else if (combinedCoef > 0) {
 						operator = "+";
 					} else if (combinedCoef == 0) { // skip creating new term,
@@ -218,11 +279,12 @@ public class Canonicalize {
 		}
 		if (!rt.isEmpty()) {
 			for (Term t : rt) {
-				if (t.getCoefficient() > 0) { //positive on the right, minus on the left
+				if (t.getCoefficient() > 0) { // positive on the right, minus on
+												// the left
 					Term leftOverRightTerm = new Term("-", t.getCoefficient() + t.getVariable());
 					ct.add(leftOverRightTerm);
-				}else{ //minus on the right, positive on left
-					Term leftOverRightTerm = new Term("+", t.getCoefficient()*-1 + t.getVariable());
+				} else { // minus on the right, positive on left
+					Term leftOverRightTerm = new Term("+", t.getCoefficient() * -1 + t.getVariable());
 					ct.add(leftOverRightTerm);
 				}
 			}
@@ -231,7 +293,9 @@ public class Canonicalize {
 		return ct;
 	}
 
-	private static void createTerms(List<Term> termsList, String[] expressions) throws MalformedInputException{
+	
+	//this function takes the expressions in string array form, creates a term, and adds the terms to termsList
+	private static void createTerms(List<Term> termsList, String[] expressions) throws MalformedInputException {
 		String exponent = "+";
 
 		for (int i = 0; i < expressions.length; i++) {
